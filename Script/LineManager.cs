@@ -1,11 +1,11 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-namespace NipaUIs
+namespace NipaDebugs
 {
     using NipaFriends;
 
-    public class NLine : global::NipaFriends.SingletonMonoBehaviour<NLine>
+    public class LineManager : SingletonMonoBehaviour<LineManager>
     {
         public PoolFactory<LineUI> LinePoolFactory => this.linePoolFactory;
 

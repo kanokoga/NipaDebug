@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace NipaUIs
+namespace NipaDebugs
 {
     [RequireComponent(typeof(CanvasRenderer))]
     public class LineUI : MaskableGraphic

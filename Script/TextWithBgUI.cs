@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
-namespace NipaUIs
+namespace NipaDebugs
 {
     [RequireComponent(typeof(VerticalLayoutGroup))]
     [RequireComponent(typeof(ContentSizeFitter))]

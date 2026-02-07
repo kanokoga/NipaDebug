@@ -156,6 +156,8 @@ MonoBehaviour:
   labelPoolFactory:
     prefab: {fileID: 8574940769064221880, guid: 4fb2f645930b98d42a9d8f6d4faf4b1c, type: 3}
     poolTransform: {fileID: 7031840059330242844}
+  lineManager: {fileID: 0}
+  pool: {fileID: 8402298811298472197}
 --- !u!114 &134363949582949849
 MonoBehaviour:
   m_ObjectHideFlags: 0

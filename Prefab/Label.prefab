@@ -280,7 +280,7 @@ GameObject:
   - component: {fileID: 3206933362064366418}
   - component: {fileID: 8574940769064221880}
   m_Layer: 0
-  m_Name: Label-UI
+  m_Name: Label
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace NipaUIs.NipaFriends
+namespace NipaDebugs.NipaFriends
 {
     public class ObjectPool<T> where T : class
     {

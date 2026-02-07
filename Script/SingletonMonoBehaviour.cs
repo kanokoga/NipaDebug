@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace NipaUIs.NipaFriends
+namespace NipaDebugs.NipaFriends
 {
      public class SingletonMonoBehaviour<T> : MonoBehaviour where T : MonoBehaviour
     {

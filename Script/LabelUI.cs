@@ -1,13 +1,12 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace NipaUIs
+namespace NipaDebugs
 {
     public class LabelUI : MonoBehaviour
     {
         public static Camera Camera;
-
-        public int lastUpdateFrame = -1;
 
         [SerializeField] private TextWithBgUI textWithBg;
         [SerializeField] private RectTransform rectTransform;
@@ -15,6 +14,9 @@ namespace NipaUIs
         private Vector3 worldPosition;
         private Vector3 offset;
         private bool hasLine = false;
+        private Func<LabelConfig> configUpdater;
+        private bool hasConfigUpdater = false;
+
 
         public void SetText(string text)
         {
@@ -27,6 +29,12 @@ namespace NipaUIs
         public void SetFontSize(int size)
         {
             this.textWithBg.TextComponent.fontSize = size;
+        }
+
+        public void SetLabelConfigCallback(Func<LabelConfig> configFunc)
+        {
+            this.configUpdater = configFunc;
+            this.hasConfigUpdater = configFunc != null;
         }
 
         public void SetTextColor(Color color)
@@ -50,14 +58,24 @@ namespace NipaUIs
                 return;
             }
 
-            this.lineConnection = NLine.Instance.LinePoolFactory.GetObject();
+            this.lineConnection = LineManager.Instance.LinePoolFactory.GetObject();
             this.lineConnection.gameObject.SetActive(true);
             this.lineConnection.thickness = lineWidth;
             this.lineConnection.color = lineColor;
         }
 
-        public void UpdatePosition()
+        private void Update()
         {
+            if(this.hasConfigUpdater == true)
+            {
+                var labelConfig = this.configUpdater();
+                this.SetText(labelConfig.message);
+                this.SetTextColor(labelConfig.textColor);
+                this.SetBackgroundColor(labelConfig.backgroundColor);
+                this.SetWorldPosition(labelConfig.worldPosition);
+                this.SetOffset(labelConfig.offset);
+            }
+
             var screenPosition = Camera.WorldToScreenPoint(this.worldPosition);
             this.rectTransform.position = screenPosition + this.offset;
             if(this.hasLine == true)
@@ -68,13 +86,14 @@ namespace NipaUIs
             }
         }
 
-        private void OnDisable()
+        public void Dispose()
         {
             if(this.hasLine == true)
             {
                 this.lineConnection.gameObject.SetActive(false);
-                NLine.Instance.LinePoolFactory.PoolObject(this.lineConnection);
+                LineManager.Instance.LinePoolFactory.PoolObject(this.lineConnection);
                 this.lineConnection = null;
+                this.hasLine = false;
             }
         }
     }

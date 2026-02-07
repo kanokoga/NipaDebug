@@ -1,5 +1,5 @@
 using System;
-using NipaUIs;
+using NipaDebugs;
 using UnityEngine;
 
 namespace NipaUI.Samples
@@ -12,20 +12,21 @@ namespace NipaUI.Samples
 
         private void Start()
         {
-            var config = NLabelInitConfig.GetDefConfig;
-            config.id = this.id;
-            config.textColor = this.textColor;
-            config.backgroundColor = this.backgroundColor;
-            NLabel.Instance.InitLabel(config);
+            var initconfig = LabelInitConfig.GetDefConfig;
+            initconfig.id = this.id;
+            initconfig.textColor = this.textColor;
+            initconfig.backgroundColor = this.backgroundColor;
+            initconfig.fontSize = 20;
 
-            var config2 = NLabelInitConfig.GetDefConfig;
-            config2.id = "static_label";
-            config2.message = "I am static!";
-            config2.worldPosition = new Vector3(0f, 0f, 0f);
-            config2.textColor = Color.yellow;
-            config2.backgroundColor = Color.blue;
-            config2.requireUpdate = false;
-            NLabel.Instance.InitLabel(config2);
+            var config = new LabelConfig(initconfig);
+            initconfig.configUpdater = () =>
+            {
+                config.message = Time.time.ToString();
+                config.worldPosition = this.transform.position;
+                return config;
+            };
+
+            LabelManager.Instance.InitLabel(initconfig);
         }
 
         private void Update()
@@ -33,10 +34,6 @@ namespace NipaUI.Samples
             var x = Mathf.Sin(Time.time);
             var z = Mathf.Cos(Time.time);
             this.transform.position = new Vector3(x * 5f, 0f, z * 5f);
-
-            NLabel.Instance.UpdateLabel(this.id,
-                this.transform.position.ToString(),
-                this.transform.position);
         }
     }
 }

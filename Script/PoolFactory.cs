@@ -4,7 +4,7 @@ using UnityEngine;
 using System.Linq;
 using System;
 
-namespace NipaUIs.NipaFriends
+namespace NipaDebugs.NipaFriends
 {
     /// <summary>
     /// プール付きのオブジェクト生成クラス。

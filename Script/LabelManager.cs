@@ -1,38 +1,59 @@
+using System;
 using UnityEngine;
 using System.Collections.Generic;
 
-namespace NipaUIs
+namespace NipaDebugs
 {
     using NipaFriends;
 
-    public struct NLabelInitConfig
+    public struct LabelInitConfig
     {
         public string id;
         public string message;
         public Vector3 worldPosition;
         public Vector3 offset;
-        public bool requireUpdate;
         public int fontSize;
         public Color textColor;
         public Color backgroundColor;
         public float lineWidth;
+        public Func<LabelConfig> configUpdater;
 
-        public static NLabelInitConfig GetDefConfig = new NLabelInitConfig
+        public static LabelInitConfig GetDefConfig = new LabelInitConfig
         {
             id = "",
             message = "",
             worldPosition = Vector3.zero,
             offset = new Vector3(20f, 20f, 0f),
-            requireUpdate = true,
             fontSize = 12,
             textColor = Color.white,
             backgroundColor = Color.black,
-            lineWidth = 2f
+            lineWidth = 2f,
+            configUpdater = null
         };
     }
 
-    public class NLabel : SingletonMonoBehaviour<NLabel>
+    public struct LabelConfig
     {
+        public LabelConfig(LabelInitConfig initConfig)
+        {
+            this.message = initConfig.message;
+            this.worldPosition = initConfig.worldPosition;
+            this.offset = initConfig.offset;
+            this.textColor = initConfig.textColor;
+            this.backgroundColor = initConfig.backgroundColor;
+        }
+
+        public string message;
+        public Vector3 worldPosition;
+        public Vector3 offset;
+        public Color textColor;
+        public Color backgroundColor;
+    }
+
+    public class LabelManager : SingletonMonoBehaviour<LabelManager>
+    {
+        public bool IsActive { get; private set; } = true;
+
         [SerializeField] private Canvas screenOverlayCanvas;
 
         [SerializeField] private PoolFactory<LabelUI> labelPoolFactory
@@ -41,42 +62,30 @@ namespace NipaUIs
         private Dictionary<string, LabelUI> activeLabels =
             new Dictionary<string, LabelUI>();
 
+        [SerializeField] private GameObject pool = null;
+
 
         private void Awake()
         {
             LabelUI.Camera = Camera.main;
         }
 
-        private void Update()
+        public void SetActive(bool active)
         {
-            this.UpdateLabelPositions();
-        }
-
-        private void LateUpdate()
-        {
-            var currentFrame = Time.frameCount;
-
-            foreach(var kvp in this.activeLabels)
-            {
-                var label = kvp.Value;
-                if(label.lastUpdateFrame > 0 && label.lastUpdateFrame != currentFrame)
-                {
-                    // このフレームで更新されていないラベルを非アクティブに
-                    label.gameObject.SetActive(false);
-                }
-            }
+            this.IsActive = active;
+            this.pool.SetActive(active);
+            this.screenOverlayCanvas.enabled = active;
         }
 
         /// <summary>
         /// ラベルを初期化・作成します
         /// </summary>
-        public void InitLabel(NLabelInitConfig config)
+        public void InitLabel(LabelInitConfig config)
         {
             var id = config.id;
             var message = config.message;
             var worldPosition = config.worldPosition;
             var offset = config.offset;
-            var needUpdateEveryFrame = config.requireUpdate;
             var fontSize = config.fontSize;
             var textColor = config.textColor;
             var backgroundColor = config.backgroundColor;
@@ -89,7 +98,7 @@ namespace NipaUIs
 
             if(this.activeLabels.ContainsKey(id))
             {
-                this.UpdateLabel(id, message, worldPosition);
+                this.RemoveLabel(id);
                 return;
             }
 
@@ -104,13 +113,12 @@ namespace NipaUIs
             labelUI.SetFontSize(fontSize);
             labelUI.SetTextColor(textColor);
             labelUI.SetBackgroundColor(backgroundColor);
-            labelUI.lastUpdateFrame = needUpdateEveryFrame == true
-                ? Time.frameCount
-                : -1;
+            labelUI.SetLabelConfigCallback(config.configUpdater);
             labelUI.InitLine(lineWidth, backgroundColor);
 
             this.activeLabels[id] = labelUI;
         }
+
 
         /// <summary>
         /// ラベルを更新します（メッセージと位置）
@@ -124,12 +132,6 @@ namespace NipaUIs
 
             var label = this.activeLabels[id];
             label.SetText(message);
-
-            label.SetWorldPosition(worldPosition);
-            if(label.lastUpdateFrame >= 0)
-            {
-                label.lastUpdateFrame = Time.frameCount;
-            }
         }
 
         /// <summary>
@@ -144,10 +146,6 @@ namespace NipaUIs
 
             var label = this.activeLabels[id];
             label.SetWorldPosition(worldPosition);
-            if(label.lastUpdateFrame >= 0)
-            {
-                label.lastUpdateFrame = Time.frameCount;
-            }
         }
 
         /// <summary>
@@ -162,10 +160,6 @@ namespace NipaUIs
 
             var label = this.activeLabels[id];
             label.SetText(message);
-            if(label.lastUpdateFrame >= 0)
-            {
-                label.lastUpdateFrame = Time.frameCount;
-            }
         }
 
         /// <summary>
@@ -180,10 +174,6 @@ namespace NipaUIs
 
             var label = this.activeLabels[id];
             label.SetOffset(offset);
-            if(label.lastUpdateFrame >= 0)
-            {
-                label.lastUpdateFrame = Time.frameCount;
-            }
         }
 
         /// <summary>
@@ -197,6 +187,7 @@ namespace NipaUIs
             }
 
             var labelUI = this.activeLabels[id];
+            labelUI.Dispose();
             this.labelPoolFactory.PoolObject(labelUI);
             this.activeLabels.Remove(id);
         }
@@ -212,15 +203,6 @@ namespace NipaUIs
             }
 
             this.activeLabels.Clear();
-        }
-
-        private void UpdateLabelPositions()
-        {
-            foreach(var kvp in this.activeLabels)
-            {
-                var labelUI = kvp.Value;
-                labelUI.UpdatePosition();
-            }
         }
     }
 }
