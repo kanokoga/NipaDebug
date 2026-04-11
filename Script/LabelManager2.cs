@@ -68,6 +68,13 @@ namespace NipaDebugs
         public void DrawLabel(Vector3 worldPosition, string message)
             => this.DrawLabel(worldPosition, message, LabelDraw2Style.Default);
 
+        public void DrawLabel(Vector3 worldPosition, string message, Vector2 offset)
+        {
+            var style = LabelDraw2Style.Default;
+            style.offset = offset;
+            this.DrawLabel(worldPosition, message, style);
+        }
+
         /// <summary>
         /// スタイルを指定してラベルを 1 件描画登録する。
         /// </summary>
